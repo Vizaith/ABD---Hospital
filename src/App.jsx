@@ -3,7 +3,10 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ProtectedRoute } from './components/ProtectedRoute';
-
+import { Farmacia } from './pages/Farmacia';
+import { Hospitalizaciones } from './pages/Hospitalizaciones';
+import { Reportes } from './pages/Reportes';
+import { Usuarios } from './pages/Usuarios';
 import { Registro } from './pages/Registro';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
@@ -45,6 +48,10 @@ function AppContent() {
             <Route path="/facturacion" element={<ProtectedRoute><Facturacion /></ProtectedRoute>} />
             <Route path="/laboratorios" element={<ProtectedRoute><Laboratorios /></ProtectedRoute>} />
             <Route path="/auditoria" element={<ProtectedRoute><Auditoria /></ProtectedRoute>} />
+            <Route path="/farmacia" element={<ProtectedRoute><Farmacia /></ProtectedRoute>} />
+            <Route path="/hospitalizaciones" element={<ProtectedRoute><Hospitalizaciones /></ProtectedRoute>} />
+            <Route path="/reportes" element={<ProtectedRoute><Reportes /></ProtectedRoute>} />
+            <Route path="/usuarios" element={<ProtectedRoute><Usuarios /></ProtectedRoute>} />
           </Routes>
         </div>
         <Footer />

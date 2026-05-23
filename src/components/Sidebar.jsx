@@ -25,7 +25,6 @@ export const Sidebar = () => {
           <li><Link to="/pacientes" className={isActive('/pacientes')}>Pacientes</Link></li>
         )}
         
-        {/* NUEVA SECCIÓN: Acceso a Médicos solo para Administradores */}
         {rol === 'Administrador' && (
           <li><Link to="/medicos" className={isActive('/medicos')}>Personal Médico</Link></li>
         )}
@@ -36,6 +35,10 @@ export const Sidebar = () => {
           <>
             <li><Link to="/auditoria" className={isActive('/auditoria')}>Auditoría</Link></li>
             <li><Link to="/laboratorios" className={isActive('/laboratorios')}>Laboratorios</Link></li>
+            <li><Link to="/farmacia" className={isActive('/farmacia')}>Farmacia</Link></li>
+            <li><Link to="/hospitalizaciones" className={isActive('/hospitalizaciones')}>Hospitalizaciones</Link></li>
+            <li><Link to="/reportes" className={isActive('/reportes')}>Reportes</Link></li>
+            <li><Link to="/usuarios" className={isActive('/usuarios')}>Gestión de Usuarios</Link></li>
           </>
         )}
       </ul>

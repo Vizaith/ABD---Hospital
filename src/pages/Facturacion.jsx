@@ -6,11 +6,13 @@ export const Facturacion = () => {
   const [view, setView] = useState('list');
   const [lista, setLista] = useState([]);
   const [editingId, setEditingId] = useState(null);
-
   const [form, setForm] = useState({ id_paciente: '', total: '', metodo: '' });
   const [pacientes, setPacientes] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Filtros
+  const [fPaciente, setFPaciente] = useState('');
 
   const metodosPago = ["Efectivo", "Tarjeta de Crédito", "Tarjeta de Débito", "Transferencia"];
 
@@ -20,55 +22,28 @@ export const Facturacion = () => {
   }, []);
 
   const fetchDatos = async () => {
-    // Columnas exactas según imagen_28.png
-    const { data, error } = await supabase
-      .from('facturas')
-      .select('id, id_paciente, total, metodo')
-      .order('id', { ascending: false });
-    
-    if (error) console.error("Error al cargar facturas:", error);
+    const { data } = await supabase.from('facturas').select('id, id_paciente, total, metodo').order('id', { ascending: false });
     if (data) setLista(data);
   };
+
+  // Filtrado
+  const listaFiltrada = lista.filter(f => {
+    const nombre = pacientes.find(p => p.id_paciente === f.id_paciente)?.nombre_completo || '';
+    return nombre.toLowerCase().includes(fPaciente.toLowerCase());
+  });
 
   const isFormValid = form.id_paciente !== '' && parseFloat(form.total) > 0 && form.metodo !== '';
 
   const handleGenerarFactura = async () => {
     if (!isFormValid) return;
     setLoading(true);
-    
     if (editingId) {
-      // Usando las columnas exactas de imagen_28.png
-      const { error } = await supabase
-        .from('facturas')
-        .update({ 
-          id_paciente: parseInt(form.id_paciente), 
-          total: parseFloat(form.total), 
-          metodo: form.metodo 
-        })
-        .eq('id', editingId);
-      
-      if (error) {
-        alert("Error: " + error.message);
-      } else {
-        alert("Factura actualizada");
-      }
+      await supabase.from('facturas').update({ id_paciente: parseInt(form.id_paciente), total: parseFloat(form.total), metodo: form.metodo }).eq('id', editingId);
     } else {
-      const { error } = await supabase.rpc('fn_registrar_factura', { 
-        p_id_paciente: parseInt(form.id_paciente), 
-        p_total: parseFloat(form.total), 
-        p_metodo_pago: form.metodo 
-      });
-      if (error) alert("Error al generar factura: " + error.message);
-      else alert("Factura generada correctamente");
+      await supabase.rpc('fn_registrar_factura', { p_id_paciente: parseInt(form.id_paciente), p_total: parseFloat(form.total), p_metodo_pago: form.metodo });
     }
-    
-    // Reset y refresco
     setForm({ id_paciente: '', total: '', metodo: '' });
-    setBusqueda(''); 
-    setEditingId(null); 
-    setView('list'); 
-    await fetchDatos(); // Esperar a que los datos se recarguen del servidor
-    setLoading(false);
+    setBusqueda(''); setEditingId(null); setView('list'); await fetchDatos(); setLoading(false);
   };
 
   const eliminar = async (id) => {
@@ -78,11 +53,10 @@ export const Facturacion = () => {
   };
 
   const editar = (item) => {
-    const pacienteEncontrado = pacientes.find(p => p.id_paciente === item.id_paciente);
+    const p = pacientes.find(p => p.id_paciente === item.id_paciente);
     setForm({ id_paciente: item.id_paciente, total: item.total, metodo: item.metodo });
-    setBusqueda(pacienteEncontrado ? pacienteEncontrado.nombre_completo : '');
-    setEditingId(item.id);
-    setView('form');
+    setBusqueda(p ? p.nombre_completo : '');
+    setEditingId(item.id); setView('form');
   };
 
   if (view === 'list') {
@@ -92,6 +66,10 @@ export const Facturacion = () => {
           <h2>Historial de Facturación</h2>
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ id_paciente: '', total: '', metodo: '' }); setBusqueda(''); setEditingId(null); setView('form'); }}>+ Nueva Factura</button>
         </div>
+
+        {/* Filtro */}
+        <input className="input-field" placeholder="Buscar factura por paciente..." value={fPaciente} onChange={e => setFPaciente(e.target.value)} style={{ marginBottom: '1rem' }} />
+
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f0fdf4', textAlign: 'left', borderBottom: '2px solid var(--accent-color)' }}>
@@ -102,7 +80,7 @@ export const Facturacion = () => {
             </tr>
           </thead>
           <tbody>
-            {lista.map(f => (
+            {listaFiltrada.map(f => (
               <tr key={f.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                 <td style={{ padding: '0.75rem' }}>{pacientes.find(p => p.id_paciente === f.id_paciente)?.nombre_completo || f.id_paciente}</td>
                 <td style={{ padding: '0.75rem' }}>${f.total}</td>
@@ -125,7 +103,6 @@ export const Facturacion = () => {
         <h2>{editingId ? 'Editar Factura' : 'Módulo de Facturación'}</h2>
         <button onClick={() => setView('list')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'gray' }}>✕ Cancelar</button>
       </div>
-      
       <label>Paciente:</label>
       <input className="input-field" list="list-p" value={busqueda} onChange={(e) => {
         setBusqueda(e.target.value);
@@ -133,16 +110,13 @@ export const Facturacion = () => {
         setForm({ ...form, id_paciente: p ? p.id_paciente : '' });
       }} placeholder="Buscar paciente..." />
       <datalist id="list-p">{pacientes.map(p => <option key={p.id_paciente} value={p.nombre_completo} />)}</datalist>
-
       <label>Total:</label>
       <input className="input-field" type="number" placeholder="0.00" value={form.total} onChange={e => setForm({ ...form, total: e.target.value })} />
-      
       <label>Método de Pago:</label>
       <select className="input-field" value={form.metodo} onChange={e => setForm({ ...form, metodo: e.target.value })}>
         <option value="">Seleccione un método...</option>
         {metodosPago.map(m => <option key={m} value={m}>{m}</option>)}
       </select>
-
       <button className="btn-submit" disabled={!isFormValid || loading} onClick={handleGenerarFactura} style={{ opacity: isFormValid && !loading ? 1 : 0.5 }}>
         {loading ? 'Procesando...' : (editingId ? 'Actualizar Factura' : 'Generar Factura')}
       </button>

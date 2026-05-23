@@ -6,13 +6,16 @@ export const Consultas = () => {
   const [view, setView] = useState('list');
   const [lista, setLista] = useState([]);
   const [editingId, setEditingId] = useState(null);
-
   const [form, setForm] = useState({ id_paciente: '', id_medico: '', motivo: '', fecha_consulta: '' });
   const [pacientes, setPacientes] = useState([]);
   const [medicos, setMedicos] = useState([]);
   const [pBusqueda, setPBusqueda] = useState('');
   const [mBusqueda, setMBusqueda] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Estados de filtro
+  const [fPaciente, setFPaciente] = useState('');
+  const [fMedico, setFMedico] = useState('');
 
   const isFormValid = form.id_paciente && form.id_medico && form.motivo && form.fecha_consulta;
 
@@ -31,10 +34,15 @@ export const Consultas = () => {
     if(data) setLista(data);
   };
 
+  // Filtrado
+  const listaFiltrada = lista.filter(c => 
+    (c.pacientes?.nombre_completo || '').toLowerCase().includes(fPaciente.toLowerCase()) &&
+    (c.medicos?.nombre_completo || '').toLowerCase().includes(fMedico.toLowerCase())
+  );
+
   const handleAgendar = async () => {
     if (!isFormValid) return;
     setLoading(true);
-    
     if (editingId) {
       const { error } = await supabase.from('consultas').update(form).eq('id_consulta', editingId);
       if (error) alert("Error: " + error.message);
@@ -44,7 +52,6 @@ export const Consultas = () => {
       if (error) alert("Error: " + error.message);
       else alert("Consulta agendada correctamente");
     }
-    
     setLoading(false);
     setForm({ id_paciente: '', id_medico: '', motivo: '', fecha_consulta: '' });
     setPBusqueda(''); setMBusqueda(''); setEditingId(null); setView('list');
@@ -72,6 +79,13 @@ export const Consultas = () => {
           <h2>Consultas Recientes</h2>
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ id_paciente: '', id_medico: '', motivo: '', fecha_consulta: '' }); setPBusqueda(''); setMBusqueda(''); setEditingId(null); setView('form'); }}>+ Nueva Consulta</button>
         </div>
+        
+        {/* Filtros */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
+          <input className="input-field" placeholder="Filtrar paciente..." value={fPaciente} onChange={e => setFPaciente(e.target.value)} />
+          <input className="input-field" placeholder="Filtrar médico..." value={fMedico} onChange={e => setFMedico(e.target.value)} />
+        </div>
+
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f0fdf4', textAlign: 'left', borderBottom: '2px solid var(--accent-color)' }}>
@@ -83,7 +97,7 @@ export const Consultas = () => {
             </tr>
           </thead>
           <tbody>
-            {lista.map(c => (
+            {listaFiltrada.map(c => (
               <tr key={c.id_consulta} style={{ borderBottom: '1px solid #e2e8f0' }}>
                 <td style={{ padding: '0.75rem' }}>{c.fecha_consulta ? new Date(c.fecha_consulta).toLocaleDateString() : 'N/A'}</td>
                 <td style={{ padding: '0.75rem' }}>{c.pacientes?.nombre_completo || 'N/A'}</td>
@@ -107,7 +121,6 @@ export const Consultas = () => {
         <h2>{editingId ? 'Editar Consulta' : 'Agenda de Consultas'}</h2>
         <button onClick={() => setView('list')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'gray' }}>✕ Cancelar</button>
       </div>
-      
       <label>Paciente:</label>
       <input className="input-field" list="list-p" value={pBusqueda} onChange={(e) => {
         setPBusqueda(e.target.value);
@@ -115,7 +128,6 @@ export const Consultas = () => {
         setForm({...form, id_paciente: p ? p.id_paciente : ''});
       }} placeholder="Selecciona paciente..." />
       <datalist id="list-p">{pacientes.map(p => <option key={p.id_paciente} value={p.nombre_completo} />)}</datalist>
-
       <label>Médico:</label>
       <input className="input-field" list="list-m" value={mBusqueda} onChange={(e) => {
         setMBusqueda(e.target.value);
@@ -123,13 +135,10 @@ export const Consultas = () => {
         setForm({...form, id_medico: m ? m.id_medico : ''});
       }} placeholder="Selecciona médico..." />
       <datalist id="list-m">{medicos.map(m => <option key={m.id_medico} value={m.nombre_completo} />)}</datalist>
-
       <label>Fecha:</label>
       <input className="input-field" type="date" value={form.fecha_consulta} onChange={e => setForm({...form, fecha_consulta: e.target.value})} />
-      
       <label>Motivo:</label>
       <textarea className="input-field" value={form.motivo} placeholder="Motivo de la consulta" onChange={e => setForm({...form, motivo: e.target.value})}></textarea>
-      
       <button className="btn-submit" disabled={!isFormValid || loading} onClick={handleAgendar} style={{ opacity: (!isFormValid || loading) ? 0.5 : 1 }}>
         {loading ? 'Procesando...' : (editingId ? 'Actualizar Consulta' : 'Agendar Consulta')}
       </button>

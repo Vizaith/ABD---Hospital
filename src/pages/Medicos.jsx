@@ -7,13 +7,13 @@ export const Medicos = () => {
   const [lista, setLista] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  // Agregado campo 'cedula' aquí
   const [form, setForm] = useState({ nombre_completo: '', id_especialidad: '', cedula: '' });
 
-  useEffect(() => { 
-    fetchDatos(); 
-    fetchEspecialidades();
-  }, []);
+  // Filtros
+  const [fNombre, setFNombre] = useState('');
+  const [fEspecialidad, setFEspecialidad] = useState('');
+
+  useEffect(() => { fetchDatos(); fetchEspecialidades(); }, []);
 
   const fetchDatos = async () => {
     const { data } = await supabase.from('medicos').select('*').order('id_medico', { ascending: false });
@@ -25,26 +25,19 @@ export const Medicos = () => {
     if(data) setEspecialidades(data);
   };
 
+  // Filtrado
+  const listaFiltrada = lista.filter(m => 
+    m.nombre_completo.toLowerCase().includes(fNombre.toLowerCase()) &&
+    (fEspecialidad === '' || m.id_especialidad.toString() === fEspecialidad)
+  );
+
   const registrar = async () => {
-    // Validamos que todos los campos, incluyendo cedula, existan
-    if (!form.nombre_completo || !form.id_especialidad || !form.cedula) {
-      return alert("Por favor completa todos los campos, incluyendo la cédula.");
-    }
-
-    const dataToSend = {
-      nombre_completo: form.nombre_completo,
-      id_especialidad: parseInt(form.id_especialidad),
-      cedula: form.cedula
-    };
-
+    if (!form.nombre_completo || !form.id_especialidad || !form.cedula) return alert("Completa todos los campos");
+    const dataToSend = { nombre_completo: form.nombre_completo, id_especialidad: parseInt(form.id_especialidad), cedula: form.cedula };
     if (editingId) {
-      const { error } = await supabase.from('medicos').update(dataToSend).eq('id_medico', editingId);
-      if (error) alert("Error: " + error.message);
-      else alert("Médico actualizado");
+      await supabase.from('medicos').update(dataToSend).eq('id_medico', editingId);
     } else {
-      const { error } = await supabase.from('medicos').insert([dataToSend]);
-      if (error) alert("Error: " + error.message);
-      else alert("Médico registrado");
+      await supabase.from('medicos').insert([dataToSend]);
     }
     setForm({ nombre_completo: '', id_especialidad: '', cedula: '' });
     setEditingId(null); setView('list'); fetchDatos();
@@ -57,11 +50,7 @@ export const Medicos = () => {
   };
 
   const editar = (item) => {
-    setForm({ 
-      nombre_completo: item.nombre_completo, 
-      id_especialidad: item.id_especialidad,
-      cedula: item.cedula 
-    });
+    setForm({ nombre_completo: item.nombre_completo, id_especialidad: item.id_especialidad, cedula: item.cedula });
     setEditingId(item.id_medico); setView('form');
   };
 
@@ -72,6 +61,16 @@ export const Medicos = () => {
           <h2>Personal Médico</h2>
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ nombre_completo: '', id_especialidad: '', cedula: '' }); setEditingId(null); setView('form'); }}>+ Nuevo Médico</button>
         </div>
+
+        {/* Filtros */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
+          <input className="input-field" placeholder="Buscar por nombre..." value={fNombre} onChange={e => setFNombre(e.target.value)} />
+          <select className="input-field" value={fEspecialidad} onChange={e => setFEspecialidad(e.target.value)}>
+            <option value="">Todas las especialidades</option>
+            {especialidades.map(e => <option key={e.id_especialidad} value={e.id_especialidad}>{e.nombre}</option>)}
+          </select>
+        </div>
+
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f0fdf4', textAlign: 'left', borderBottom: '2px solid var(--accent-color)' }}>
@@ -82,7 +81,7 @@ export const Medicos = () => {
             </tr>
           </thead>
           <tbody>
-            {lista.map(m => (
+            {listaFiltrada.map(m => (
               <tr key={m.id_medico} style={{ borderBottom: '1px solid #e2e8f0' }}>
                 <td style={{ padding: '0.75rem' }}>{m.nombre_completo}</td>
                 <td style={{ padding: '0.75rem' }}>{m.cedula}</td>
@@ -105,22 +104,15 @@ export const Medicos = () => {
         <h2>{editingId ? 'Editar Médico' : 'Registro de Médico'}</h2>
         <button onClick={() => setView('list')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'gray' }}>✕ Cancelar</button>
       </div>
-      
       <label>Nombre Completo:</label>
       <input className="input-field" value={form.nombre_completo} onChange={e => setForm({...form, nombre_completo: e.target.value})} />
-      
       <label>Cédula:</label>
       <input className="input-field" value={form.cedula} onChange={e => setForm({...form, cedula: e.target.value})} />
-
       <label>Especialidad:</label>
       <select className="input-field" value={form.id_especialidad} onChange={e => setForm({...form, id_especialidad: e.target.value})}>
-        <option value="">Seleccione una especialidad...</option>
-        {especialidades.map(esp => (
-          <option key={esp.id_especialidad} value={esp.id_especialidad}>{esp.nombre}</option>
-        ))}
+        <option value="">Seleccione...</option>
+        {especialidades.map(esp => <option key={esp.id_especialidad} value={esp.id_especialidad}>{esp.nombre}</option>)}
       </select>
-
-      {/* Botón con ancho 100% para igualar los campos */}
       <button className="btn-submit" style={{ width: '100%', marginTop: '1rem' }} onClick={registrar}>
         {editingId ? 'Actualizar' : 'Registrar'}
       </button>
