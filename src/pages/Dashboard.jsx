@@ -7,22 +7,29 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const fetchConsultas = async () => {
-      const { data } = await supabase
+      // Corregido: se usa 'fecha_consulta' según imagen_52.png
+      const { data, error } = await supabase
         .from('consultas')
         .select(`
-          id_consulta, motivo, fecha,
-          pacientes(nombre_completo),
-          medicos(nombre_completo)
+          id_consulta, 
+          motivo, 
+          fecha_consulta, 
+          pacientes!fk_consultas_paciente(nombre_completo),
+          medicos!fk_consultas_medico(nombre_completo)
         `)
-        .order('id_consulta', { ascending: false });
+        .order('id_consulta', { ascending: false })
+        .limit(20);
 
-      setConsultas(data || []);
+      if (error) {
+        console.error("Error al cargar consultas:", error);
+      } else {
+        setConsultas(data || []);
+      }
       setLoading(false);
     };
     fetchConsultas();
   }, []);
 
-  // Datos para la parte superior
   const totalConsultas = consultas.length;
   const pacientesUnicos = new Set(consultas.map(c => c.pacientes?.nombre_completo)).size;
 
@@ -31,7 +38,6 @@ export const Dashboard = () => {
   return (
     <div className="form-card" style={{ maxWidth: '1000px', margin: '2rem auto' }}>
       
-      {/* Sección de Datos Generales (KPIs) */}
       <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
         <div style={{ flex: 1, padding: '15px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #d1fae5', textAlign: 'center' }}>
           <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#065f46' }}>Total Consultas</h3>
@@ -60,7 +66,8 @@ export const Dashboard = () => {
               <td style={{ padding: '0.75rem' }}>{c.pacientes?.nombre_completo || 'Sin nombre'}</td>
               <td style={{ padding: '0.75rem' }}>{c.medicos?.nombre_completo || 'Sin médico'}</td>
               <td style={{ padding: '0.75rem' }}>{c.motivo}</td>
-              <td style={{ padding: '0.75rem' }}>{c.fecha ? new Date(c.fecha).toLocaleDateString() : 'N/A'}</td>
+              {/* Actualizado para usar c.fecha_consulta */}
+              <td style={{ padding: '0.75rem' }}>{c.fecha_consulta ? new Date(c.fecha_consulta).toLocaleDateString() : 'N/A'}</td>
             </tr>
           ))}
         </tbody>

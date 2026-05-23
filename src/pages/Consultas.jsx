@@ -30,8 +30,22 @@ export const Consultas = () => {
   }, []);
 
   const fetchDatos = async () => {
-    const { data } = await supabase.from('consultas').select(`id_consulta, motivo, fecha_consulta, pacientes(nombre_completo), medicos(nombre_completo)`).order('id_consulta', { ascending: false });
-    if(data) setLista(data);
+    const { data, error } = await supabase
+      .from('consultas')
+      .select(`
+        id_consulta, 
+        motivo, 
+        fecha_consulta, 
+        pacientes!fk_consultas_paciente(id_paciente, nombre_completo), 
+        medicos!fk_consultas_medico(id_medico, nombre_completo)
+      `)
+      .order('id_consulta', { ascending: false });
+
+    if (error) {
+      console.error("Error al cargar consultas:", error);
+    } else {
+      setLista(data || []);
+    }
   };
 
   // Filtrado
@@ -65,7 +79,15 @@ export const Consultas = () => {
   };
 
   const editar = (item) => {
-    setForm({ id_paciente: item.pacientes?.id_paciente || '', id_medico: item.medicos?.id_medico || '', motivo: item.motivo, fecha_consulta: item.fecha_consulta });
+    // CORRECCIÓN: Extraemos solo YYYY-MM-DD para el input date
+    const fechaFormateada = item.fecha_consulta ? item.fecha_consulta.split('T')[0] : '';
+    
+    setForm({ 
+      id_paciente: item.pacientes?.id_paciente || '', 
+      id_medico: item.medicos?.id_medico || '', 
+      motivo: item.motivo, 
+      fecha_consulta: fechaFormateada 
+    });
     setPBusqueda(item.pacientes?.nombre_completo || '');
     setMBusqueda(item.medicos?.nombre_completo || '');
     setEditingId(item.id_consulta);
@@ -80,7 +102,6 @@ export const Consultas = () => {
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ id_paciente: '', id_medico: '', motivo: '', fecha_consulta: '' }); setPBusqueda(''); setMBusqueda(''); setEditingId(null); setView('form'); }}>+ Nueva Consulta</button>
         </div>
         
-        {/* Filtros */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
           <input className="input-field" placeholder="Filtrar paciente..." value={fPaciente} onChange={e => setFPaciente(e.target.value)} />
           <input className="input-field" placeholder="Filtrar médico..." value={fMedico} onChange={e => setFMedico(e.target.value)} />

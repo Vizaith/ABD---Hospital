@@ -10,7 +10,17 @@ export const Sidebar = () => {
 
   return (
     <aside className="sidebar">
-      <h2>SIGEH</h2>
+      <h2 style={{ 
+        textAlign: 'center', 
+        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif", 
+        fontWeight: '700', 
+        letterSpacing: '2px', 
+        color: '#adadb8fb',
+        margin: '1.5rem 0'
+      }}>
+        SIGEH
+      </h2>
+      
       <ul>
         <li><Link to="/dashboard" className={isActive('/dashboard')}>Panel Principal</Link></li>
         
@@ -26,19 +36,21 @@ export const Sidebar = () => {
         )}
         
         {rol === 'Administrador' && (
-          <li><Link to="/medicos" className={isActive('/medicos')}>Personal Médico</Link></li>
+          <>
+            <li><Link to="/medicos" className={isActive('/medicos')}>Personal Médico</Link></li>
+            <li><Link to="/laboratorios" className={isActive('/laboratorios')}>Laboratorios</Link></li>
+            <li><Link to="/farmacia" className={isActive('/farmacia')}>Farmacia</Link></li>
+            <li><Link to="/hospitalizaciones" className={isActive('/hospitalizaciones')}>Hospitalizaciones</Link></li>
+          </>
         )}
         
         <li><Link to="/facturacion" className={isActive('/facturacion')}>Facturación</Link></li>
         
         {rol === 'Administrador' && (
           <>
-            <li><Link to="/auditoria" className={isActive('/auditoria')}>Auditoría</Link></li>
-            <li><Link to="/laboratorios" className={isActive('/laboratorios')}>Laboratorios</Link></li>
-            <li><Link to="/farmacia" className={isActive('/farmacia')}>Farmacia</Link></li>
-            <li><Link to="/hospitalizaciones" className={isActive('/hospitalizaciones')}>Hospitalizaciones</Link></li>
             <li><Link to="/reportes" className={isActive('/reportes')}>Reportes</Link></li>
             <li><Link to="/usuarios" className={isActive('/usuarios')}>Gestión de Usuarios</Link></li>
+            <li><Link to="/auditoria" className={isActive('/auditoria')}>Auditoría</Link></li>
           </>
         )}
       </ul>

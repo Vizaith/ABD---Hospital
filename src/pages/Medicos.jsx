@@ -8,6 +8,10 @@ export const Medicos = () => {
   const [especialidades, setEspecialidades] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ nombre_completo: '', id_especialidad: '', cedula: '' });
+  const [loading, setLoading] = useState(false);
+
+  // Validación: el botón solo se activa si todos los campos tienen valor
+  const isFormValid = form.nombre_completo.trim() !== '' && form.id_especialidad !== '' && form.cedula.trim() !== '';
 
   // Filtros
   const [fNombre, setFNombre] = useState('');
@@ -32,13 +36,18 @@ export const Medicos = () => {
   );
 
   const registrar = async () => {
-    if (!form.nombre_completo || !form.id_especialidad || !form.cedula) return alert("Completa todos los campos");
+    if (!isFormValid) return;
+    
+    setLoading(true);
     const dataToSend = { nombre_completo: form.nombre_completo, id_especialidad: parseInt(form.id_especialidad), cedula: form.cedula };
+    
     if (editingId) {
       await supabase.from('medicos').update(dataToSend).eq('id_medico', editingId);
     } else {
       await supabase.from('medicos').insert([dataToSend]);
     }
+    
+    setLoading(false);
     setForm({ nombre_completo: '', id_especialidad: '', cedula: '' });
     setEditingId(null); setView('list'); fetchDatos();
   };
@@ -113,8 +122,14 @@ export const Medicos = () => {
         <option value="">Seleccione...</option>
         {especialidades.map(esp => <option key={esp.id_especialidad} value={esp.id_especialidad}>{esp.nombre}</option>)}
       </select>
-      <button className="btn-submit" style={{ width: '100%', marginTop: '1rem' }} onClick={registrar}>
-        {editingId ? 'Actualizar' : 'Registrar'}
+      
+      <button 
+        className="btn-submit" 
+        style={{ width: '100%', marginTop: '1rem', opacity: (!isFormValid || loading) ? 0.5 : 1 }} 
+        disabled={!isFormValid || loading}
+        onClick={registrar}
+      >
+        {loading ? 'Procesando...' : (editingId ? 'Actualizar' : 'Registrar')}
       </button>
     </div>
   );

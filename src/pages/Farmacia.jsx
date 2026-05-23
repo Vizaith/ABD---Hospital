@@ -5,9 +5,13 @@ import '../styles/forms.css';
 export const Farmacia = () => {
   const [view, setView] = useState('list');
   const [lista, setLista] = useState([]);
-  const [busqueda, setBusqueda] = useState(''); // Estado para el buscador
+  const [busqueda, setBusqueda] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ nombre: '', stock: '' });
+  const [loading, setLoading] = useState(false); // Estado para evitar doble envío
+
+  // Validación: el botón solo se activa si hay nombre y stock mayor a 0
+  const isFormValid = form.nombre.trim() !== '' && form.stock !== '' && parseInt(form.stock) > 0;
 
   useEffect(() => { fetchDatos(); }, []);
 
@@ -17,17 +21,20 @@ export const Farmacia = () => {
     else console.error("Error al cargar:", error);
   };
 
-  // Filtramos la lista basada en el buscador
   const listaFiltrada = lista.filter(item => 
     item.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   const registrar = async () => {
-    if (!form.nombre || !form.stock) return alert("Completa todos los campos");
+    // Protección adicional por si intentan forzar el click
+    if (!isFormValid) return;
+
+    setLoading(true);
 
     if (editingId) {
       const { error } = await supabase.from('medicamentos').update({ nombre: form.nombre, stock: parseInt(form.stock) }).eq('id', editingId);
       if (error) alert("Error: " + error.message);
+      else alert("Medicamento actualizado");
     } else {
       const { data: existente } = await supabase.from('medicamentos').select('*').eq('nombre', form.nombre).single();
 
@@ -42,8 +49,11 @@ export const Farmacia = () => {
         else alert("Medicamento registrado");
       }
     }
+    setLoading(false);
     setForm({ nombre: '', stock: '' });
-    setEditingId(null); setView('list'); fetchDatos();
+    setEditingId(null); 
+    setView('list'); 
+    fetchDatos();
   };
 
   const eliminar = async (id) => {
@@ -65,7 +75,6 @@ export const Farmacia = () => {
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ nombre: '', stock: '' }); setEditingId(null); setView('form'); }}>+ Nuevo Producto</button>
         </div>
 
-        {/* Buscador */}
         <input 
           className="input-field" 
           placeholder="Buscar medicamento..." 
@@ -132,8 +141,14 @@ export const Farmacia = () => {
         onChange={e => setForm({...form, stock: e.target.value})} 
       />
       
-      <button className="btn-submit" onClick={registrar}>
-        {editingId ? 'Actualizar' : 'Guardar Producto'}
+      {/* Botón condicional según validación */}
+      <button 
+        className="btn-submit" 
+        onClick={registrar} 
+        disabled={!isFormValid || loading}
+        style={{ opacity: !isFormValid || loading ? 0.5 : 1, cursor: !isFormValid ? 'not-allowed' : 'pointer' }}
+      >
+        {loading ? 'Procesando...' : (editingId ? 'Actualizar' : 'Guardar Producto')}
       </button>
     </div>
   );
