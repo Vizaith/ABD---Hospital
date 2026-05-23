@@ -9,7 +9,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Pacientes } from './pages/Pacientes';
 import { Consultas } from './pages/Consultas';
-import { Expedientes } from './pages/Expedientes'; // Añadido
+import { Expedientes } from './pages/Expedientes';
 import { Medicos } from './pages/Medicos';
 import { Facturacion } from './pages/Facturacion';
 import { Laboratorios } from './pages/Laboratorios';
@@ -35,13 +35,13 @@ function AppContent() {
       <Sidebar />
       <main className="main-content">
         <Header />
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, padding: '20px' }}>
           <Routes>
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/pacientes" element={<ProtectedRoute><Pacientes /></ProtectedRoute>} />
             <Route path="/medicos" element={<ProtectedRoute><Medicos /></ProtectedRoute>} />
             <Route path="/consultas" element={<ProtectedRoute><Consultas /></ProtectedRoute>} />
-            <Route path="/expedientes" element={<ProtectedRoute><Expedientes /></ProtectedRoute>} /> {/* Añadido */}
+            <Route path="/expedientes" element={<ProtectedRoute><Expedientes /></ProtectedRoute>} />
             <Route path="/facturacion" element={<ProtectedRoute><Facturacion /></ProtectedRoute>} />
             <Route path="/laboratorios" element={<ProtectedRoute><Laboratorios /></ProtectedRoute>} />
             <Route path="/auditoria" element={<ProtectedRoute><Auditoria /></ProtectedRoute>} />
