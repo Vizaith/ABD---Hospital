@@ -17,6 +17,7 @@ import { Medicos } from './pages/Medicos';
 import { Facturacion } from './pages/Facturacion';
 import { Laboratorios } from './pages/Laboratorios';
 import { Auditoria } from './pages/Auditoria';
+import { BitacoraAccesos } from './pages/BitacoraAccesos'; // Nuevo componente
 import './styles/global.css';
 
 function AppContent() {
@@ -48,6 +49,7 @@ function AppContent() {
             <Route path="/facturacion" element={<ProtectedRoute><Facturacion /></ProtectedRoute>} />
             <Route path="/laboratorios" element={<ProtectedRoute><Laboratorios /></ProtectedRoute>} />
             <Route path="/auditoria" element={<ProtectedRoute><Auditoria /></ProtectedRoute>} />
+            <Route path="/bitacora-accesos" element={<ProtectedRoute><BitacoraAccesos /></ProtectedRoute>} />
             <Route path="/farmacia" element={<ProtectedRoute><Farmacia /></ProtectedRoute>} />
             <Route path="/hospitalizaciones" element={<ProtectedRoute><Hospitalizaciones /></ProtectedRoute>} />
             <Route path="/reportes" element={<ProtectedRoute><Reportes /></ProtectedRoute>} />

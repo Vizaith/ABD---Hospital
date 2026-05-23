@@ -51,6 +51,7 @@ export const Sidebar = () => {
             <li><Link to="/reportes" className={isActive('/reportes')}>Reportes</Link></li>
             <li><Link to="/usuarios" className={isActive('/usuarios')}>Gestión de Usuarios</Link></li>
             <li><Link to="/auditoria" className={isActive('/auditoria')}>Auditoría</Link></li>
+            <li><Link to="/bitacora-accesos" className={isActive('/bitacora-accesos')}>Bitácora de Accesos</Link></li>
           </>
         )}
       </ul>

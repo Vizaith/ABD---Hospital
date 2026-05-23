@@ -17,6 +17,7 @@ export const Login = () => {
     setLoading(true);
 
     try {
+      // 1. Autenticación
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: correo,
         password: password,
@@ -24,6 +25,7 @@ export const Login = () => {
 
       if (authError) throw authError;
 
+      // 2. Obtener datos del usuario
       const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .select('*, roles(nombre_rol)')
@@ -31,6 +33,14 @@ export const Login = () => {
         .single();
 
       if (userError) throw new Error("Error al cargar perfil de usuario");
+
+      // 3. REGISTRAR EN BITÁCORA (Esto faltaba en tu código)
+      await supabase.from('bitacora_accesos').insert([
+        { 
+          id_usuario: userData.id_usuario, 
+          fecha_acceso: new Date().toISOString() 
+        }
+      ]);
 
       localStorage.setItem('sigeh_user', JSON.stringify(userData));
       navigate('/dashboard');
@@ -66,7 +76,7 @@ export const Login = () => {
             onClick={() => setShowPassword(!showPassword)}
             style={{ 
               position: 'absolute', right: '12px', background: 'none', border: 'none', 
-              cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0'
+              cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0' 
             }}
           >
             {showPassword ? (
@@ -83,7 +93,7 @@ export const Login = () => {
           </button>
         </div>
         
-        <button type="submit" className="btn-submit" disabled={loading} style={{ marginTop: '1.5rem', padding: '0.8rem' }}>
+        <button type="submit" className="btn-submit" disabled={loading} style={{ marginTop: '1.5rem', padding: '0.8rem', width: '100%' }}>
           {loading ? 'Validando...' : 'Iniciar Sesión'}
         </button>
       </form>

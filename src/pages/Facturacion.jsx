@@ -10,11 +10,12 @@ export const Facturacion = () => {
   const [pacientes, setPacientes] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // Filtros
   const [fPaciente, setFPaciente] = useState('');
 
   const metodosPago = ["Efectivo", "Tarjeta de Crédito", "Tarjeta de Débito", "Transferencia"];
+
+  // Validación: ID paciente presente, total numérico positivo y método seleccionado
+  const isFormValid = form.id_paciente !== '' && parseFloat(form.total) > 0 && form.metodo !== '';
 
   useEffect(() => { 
     supabase.from('pacientes').select('id_paciente, nombre_completo').then(({ data }) => setPacientes(data || []));
@@ -26,24 +27,38 @@ export const Facturacion = () => {
     if (data) setLista(data);
   };
 
-  // Filtrado
   const listaFiltrada = lista.filter(f => {
     const nombre = pacientes.find(p => p.id_paciente === f.id_paciente)?.nombre_completo || '';
     return nombre.toLowerCase().includes(fPaciente.toLowerCase());
   });
 
-  const isFormValid = form.id_paciente !== '' && parseFloat(form.total) > 0 && form.metodo !== '';
-
-  const handleGenerarFactura = async () => {
+  const registrar = async () => {
     if (!isFormValid) return;
     setLoading(true);
+    
     if (editingId) {
-      await supabase.from('facturas').update({ id_paciente: parseInt(form.id_paciente), total: parseFloat(form.total), metodo: form.metodo }).eq('id', editingId);
+      await supabase.from('facturas')
+        .update({ id_paciente: parseInt(form.id_paciente), total: parseFloat(form.total), metodo: form.metodo })
+        .eq('id', editingId);
+      alert("Factura actualizada correctamente.");
     } else {
-      await supabase.rpc('fn_registrar_factura', { p_id_paciente: parseInt(form.id_paciente), p_total: parseFloat(form.total), p_metodo_pago: form.metodo });
+      const { data: factura } = await supabase.from('facturas')
+        .insert([{ id_paciente: parseInt(form.id_paciente), total: parseFloat(form.total), metodo: form.metodo }])
+        .select();
+      
+      if (factura) {
+        await supabase.from('pagos')
+          .insert([{ id_factura: factura[0].id, metodo: form.metodo, monto: parseFloat(form.total) }]);
+        alert("Factura generada correctamente.");
+      }
     }
+    
     setForm({ id_paciente: '', total: '', metodo: '' });
-    setBusqueda(''); setEditingId(null); setView('list'); await fetchDatos(); setLoading(false);
+    setBusqueda(''); 
+    setEditingId(null); 
+    setView('list'); 
+    await fetchDatos(); 
+    setLoading(false);
   };
 
   const eliminar = async (id) => {
@@ -56,7 +71,8 @@ export const Facturacion = () => {
     const p = pacientes.find(p => p.id_paciente === item.id_paciente);
     setForm({ id_paciente: item.id_paciente, total: item.total, metodo: item.metodo });
     setBusqueda(p ? p.nombre_completo : '');
-    setEditingId(item.id); setView('form');
+    setEditingId(item.id); 
+    setView('form');
   };
 
   if (view === 'list') {
@@ -66,32 +82,15 @@ export const Facturacion = () => {
           <h2>Historial de Facturación</h2>
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ id_paciente: '', total: '', metodo: '' }); setBusqueda(''); setEditingId(null); setView('form'); }}>+ Nueva Factura</button>
         </div>
-
-        {/* Filtro */}
         <input className="input-field" placeholder="Buscar factura por paciente..." value={fPaciente} onChange={e => setFPaciente(e.target.value)} style={{ marginBottom: '1rem' }} />
-
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: '#f0fdf4', textAlign: 'left', borderBottom: '2px solid var(--accent-color)' }}>
-              <th style={{ padding: '0.75rem' }}>Paciente</th>
-              <th style={{ padding: '0.75rem' }}>Total</th>
-              <th style={{ padding: '0.75rem' }}>Método</th>
-              <th style={{ padding: '0.75rem' }}>Acciones</th>
+          <thead><tr style={{ background: '#f0fdf4', textAlign: 'left', borderBottom: '2px solid var(--accent-color)' }}><th>Paciente</th><th>Total</th><th>Método</th><th>Acciones</th></tr></thead>
+          <tbody>{listaFiltrada.map(f => (
+            <tr key={f.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+              <td>{pacientes.find(p => p.id_paciente === f.id_paciente)?.nombre_completo || f.id_paciente}</td><td>${f.total}</td><td>{f.metodo}</td>
+              <td style={{ display: 'flex', gap: '10px' }}><button onClick={() => editar(f)} style={{ cursor: 'pointer', background: 'none', border: 'none' }}>✏️</button><button onClick={() => eliminar(f.id)} style={{ cursor: 'pointer', background: 'none', border: 'none', color: 'red' }}>🗑️</button></td>
             </tr>
-          </thead>
-          <tbody>
-            {listaFiltrada.map(f => (
-              <tr key={f.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '0.75rem' }}>{pacientes.find(p => p.id_paciente === f.id_paciente)?.nombre_completo || f.id_paciente}</td>
-                <td style={{ padding: '0.75rem' }}>${f.total}</td>
-                <td style={{ padding: '0.75rem' }}>{f.metodo}</td>
-                <td style={{ padding: '0.75rem', display: 'flex', gap: '10px' }}>
-                  <button onClick={() => editar(f)} style={{ cursor: 'pointer', background: 'none', border: 'none' }}>✏️</button>
-                  <button onClick={() => eliminar(f.id)} style={{ cursor: 'pointer', background: 'none', border: 'none', color: 'red' }}>🗑️</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+          ))}</tbody>
         </table>
       </div>
     );
@@ -104,11 +103,7 @@ export const Facturacion = () => {
         <button onClick={() => setView('list')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'gray' }}>✕ Cancelar</button>
       </div>
       <label>Paciente:</label>
-      <input className="input-field" list="list-p" value={busqueda} onChange={(e) => {
-        setBusqueda(e.target.value);
-        const p = pacientes.find(x => x.nombre_completo === e.target.value);
-        setForm({ ...form, id_paciente: p ? p.id_paciente : '' });
-      }} placeholder="Buscar paciente..." />
+      <input className="input-field" list="list-p" value={busqueda} onChange={(e) => { setBusqueda(e.target.value); const p = pacientes.find(x => x.nombre_completo === e.target.value); setForm({ ...form, id_paciente: p ? p.id_paciente : '' }); }} />
       <datalist id="list-p">{pacientes.map(p => <option key={p.id_paciente} value={p.nombre_completo} />)}</datalist>
       <label>Total:</label>
       <input className="input-field" type="number" placeholder="0.00" value={form.total} onChange={e => setForm({ ...form, total: e.target.value })} />
@@ -117,8 +112,8 @@ export const Facturacion = () => {
         <option value="">Seleccione un método...</option>
         {metodosPago.map(m => <option key={m} value={m}>{m}</option>)}
       </select>
-      <button className="btn-submit" disabled={!isFormValid || loading} onClick={handleGenerarFactura} style={{ opacity: isFormValid && !loading ? 1 : 0.5 }}>
-        {loading ? 'Procesando...' : (editingId ? 'Actualizar Factura' : 'Generar Factura')}
+      <button className="btn-submit" disabled={!isFormValid || loading} onClick={registrar} style={{ opacity: isFormValid ? 1 : 0.5 }}>
+        {loading ? 'Procesando...' : (editingId ? 'Actualizar Factura' : 'Guardar Factura')}
       </button>
     </div>
   );
