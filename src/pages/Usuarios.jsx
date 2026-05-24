@@ -8,7 +8,6 @@ export const Usuarios = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ nombre: '', id_rol: '', password: '', correo: '' });
   
-  // Estados para filtros
   const [fNombre, setFNombre] = useState('');
   const [fCorreo, setFCorreo] = useState('');
   const [fRol, setFRol] = useState('');
@@ -29,7 +28,6 @@ export const Usuarios = () => {
     else setLista(data || []);
   };
 
-  // Lógica de filtrado
   const listaFiltrada = lista.filter(u => 
     u.nombre.toLowerCase().includes(fNombre.toLowerCase()) &&
     u.correo.toLowerCase().includes(fCorreo.toLowerCase()) &&
@@ -91,7 +89,6 @@ export const Usuarios = () => {
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ nombre: '', id_rol: '', password: '', correo: '' }); setEditingId(null); setView('form'); }}>+ Nuevo</button>
         </div>
 
-        {/* Sección de Filtros */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
           <input className="input-field" placeholder="Buscar por nombre..." value={fNombre} onChange={e => setFNombre(e.target.value)} />
           <input className="input-field" placeholder="Buscar por correo..." value={fCorreo} onChange={e => setFCorreo(e.target.value)} />
@@ -131,7 +128,6 @@ export const Usuarios = () => {
   }
 
   return (
-    // ... (El formulario de creación/edición permanece igual)
     <div className="form-card">
       <h2>{editingId ? 'Editar Usuario' : 'Crear Usuario'}</h2>
       <input className="input-field" placeholder="Nombre" value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})} />

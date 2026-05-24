@@ -28,11 +28,10 @@ export const BaseEntity = ({ title, table, columns, idField }) => {
             <button onClick={() => { setForm({}); setView('form'); }}>+ Nuevo</button>
           </div>
           <table>
-            {/* Implementa el renderizado de filas aquí mapeando data y columns */}
           </table>
         </>
       ) : (
-        /* Formulario dinámico generado desde el array 'columns' */
+
         <div>
            {columns.map(col => (
              <input key={col} placeholder={col} onChange={e => setForm({...form, [col]: e.target.value})} />

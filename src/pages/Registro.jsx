@@ -12,7 +12,6 @@ export const Registro = () => {
   const [mensaje, setMensaje] = useState('');
   const navigate = useNavigate();
 
-  // Cargar los roles disponibles desde la BD al abrir la página
   useEffect(() => {
     const fetchRoles = async () => {
       const { data } = await supabase.from('roles').select('*');

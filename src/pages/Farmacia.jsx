@@ -8,9 +8,8 @@ export const Farmacia = () => {
   const [busqueda, setBusqueda] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ nombre: '', stock: '' });
-  const [loading, setLoading] = useState(false); // Estado para evitar doble envío
+  const [loading, setLoading] = useState(false);
 
-  // Validación: el botón solo se activa si hay nombre y stock mayor a 0
   const isFormValid = form.nombre.trim() !== '' && form.stock !== '' && parseInt(form.stock) > 0;
 
   useEffect(() => { fetchDatos(); }, []);
@@ -26,7 +25,6 @@ export const Farmacia = () => {
   );
 
   const registrar = async () => {
-    // Protección adicional por si intentan forzar el click
     if (!isFormValid) return;
 
     setLoading(true);
@@ -141,7 +139,6 @@ export const Farmacia = () => {
         onChange={e => setForm({...form, stock: e.target.value})} 
       />
       
-      {/* Botón condicional según validación */}
       <button 
         className="btn-submit" 
         onClick={registrar} 

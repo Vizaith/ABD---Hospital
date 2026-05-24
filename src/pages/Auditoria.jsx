@@ -16,7 +16,6 @@ export const Auditoria = () => {
     fetchLogs();
   }, []);
 
-  // Función para convertir etiquetas técnicas a lenguaje humano
   const getOperacionLabel = (op) => {
     const labels = { 'INSERT': 'Nuevo registro', 'UPDATE': 'Actualización', 'DELETE': 'Eliminación' };
     return labels[op] || op;
@@ -28,7 +27,6 @@ export const Auditoria = () => {
       
       {logs.map((log) => (
         <div key={log.id_auditoria} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', marginBottom: '1rem', overflow: 'hidden' }}>
-          {/* Cabecera de la fila */}
           <div 
             onClick={() => setExpandedId(expandedId === log.id_auditoria ? null : log.id_auditoria)}
             style={{ padding: '1rem', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
@@ -42,7 +40,6 @@ export const Auditoria = () => {
             </button>
           </div>
 
-          {/* Detalles humanos */}
           {expandedId === log.id_auditoria && (
             <div style={{ padding: '1rem', background: '#fff', borderTop: '1px solid #e2e8f0' }}>
               <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}><strong>Realizado por:</strong> {log.usuario || 'Sistema'}</p>

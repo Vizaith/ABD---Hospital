@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 
 export const Header = () => {
   const navigate = useNavigate();
-  // Obtenemos el usuario del localStorage
   const user = JSON.parse(localStorage.getItem('sigeh_user') || '{}');
 
   const handleLogout = () => {

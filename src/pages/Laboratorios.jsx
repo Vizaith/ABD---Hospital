@@ -22,7 +22,6 @@ export const Laboratorios = () => {
     const { data: p, error: errorP } = await supabase.from('pacientes').select('id_paciente, nombre_completo');
     const { data: l, error: errorL } = await supabase.from('laboratorios').select('id, nombre');
     
-    // Logs para depurar por qué el datalist podría estar vacío
     if (errorP) console.error("Error cargando pacientes para el datalist:", errorP);
     if (errorL) console.error("Error cargando laboratorios para el datalist:", errorL);
     
@@ -50,11 +49,9 @@ export const Laboratorios = () => {
     }
   };
 
-  // VALIDACIÓN: Comprueba que los IDs internos existan y el texto no esté vacío
   const isFormValid = form.id_paciente !== '' && form.id_laboratorio !== '' && form.resultado.trim() !== '';
 
   const registrar = async () => {
-    // Doble validación por seguridad antes de enviar a Supabase
     if (!isFormValid) {
       alert("Por favor, completa todos los campos correctamente seleccionando opciones de la lista.");
       return;

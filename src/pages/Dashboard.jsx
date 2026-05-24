@@ -7,7 +7,6 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const fetchConsultas = async () => {
-      // Corregido: se usa 'fecha_consulta' según imagen_52.png
       const { data, error } = await supabase
         .from('consultas')
         .select(`
@@ -66,7 +65,6 @@ export const Dashboard = () => {
               <td style={{ padding: '0.75rem' }}>{c.pacientes?.nombre_completo || 'Sin nombre'}</td>
               <td style={{ padding: '0.75rem' }}>{c.medicos?.nombre_completo || 'Sin médico'}</td>
               <td style={{ padding: '0.75rem' }}>{c.motivo}</td>
-              {/* Actualizado para usar c.fecha_consulta */}
               <td style={{ padding: '0.75rem' }}>{c.fecha_consulta ? new Date(c.fecha_consulta).toLocaleDateString() : 'N/A'}</td>
             </tr>
           ))}

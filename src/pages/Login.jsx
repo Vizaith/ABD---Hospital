@@ -17,7 +17,6 @@ export const Login = () => {
     setLoading(true);
 
     try {
-      // 1. Autenticación
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: correo,
         password: password,
@@ -25,7 +24,6 @@ export const Login = () => {
 
       if (authError) throw authError;
 
-      // 2. Obtener datos del usuario
       const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .select('*, roles(nombre_rol)')
@@ -34,7 +32,6 @@ export const Login = () => {
 
       if (userError) throw new Error("Error al cargar perfil de usuario");
 
-      // 3. REGISTRAR EN BITÁCORA (Esto faltaba en tu código)
       await supabase.from('bitacora_accesos').insert([
         { 
           id_usuario: userData.id_usuario, 

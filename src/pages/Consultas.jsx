@@ -194,7 +194,6 @@ export const Consultas = () => {
       <label>Motivo:</label>
       <textarea className="input-field" value={form.motivo} onChange={e => setForm({...form, motivo: e.target.value})} />
       
-      {/* Campos de receta siempre visibles */}
       <label>Medicamento:</label>
       <input className="input-field" list="list-meds" value={receta.medicamento} onChange={e => setReceta({...receta, medicamento: e.target.value})} placeholder="Busque o escriba el medicamento" />
       <datalist id="list-meds">{medicamentos.map(m => <option key={m.nombre} value={m.nombre} />)}</datalist>

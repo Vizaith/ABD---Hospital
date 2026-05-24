@@ -6,7 +6,6 @@ export const Reportes = () => {
   const [metricas, setMetricas] = useState({ totalPacientes: 0, totalConsultas: 0 });
 
   const cargarReporteGeneral = async () => {
-    // Estas consultas utilizan count para sacar métricas básicas
     const { count: countPacientes } = await supabase.from('pacientes').select('*', { count: 'exact', head: true });
     const { count: countConsultas } = await supabase.from('consultas').select('*', { count: 'exact', head: true });
     

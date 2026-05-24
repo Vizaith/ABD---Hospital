@@ -8,11 +8,10 @@ export const Hospitalizaciones = () => {
   const [pacientes, setPacientes] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [busqueda, setBusqueda] = useState('');
-  const [loading, setLoading] = useState(false); // Estado de carga para evitar errores
+  const [loading, setLoading] = useState(false); 
   const [form, setForm] = useState({ id_paciente: '', fecha_ingreso: '', motivo: '' });
   const [pBusqueda, setPBusqueda] = useState('');
 
-  // --- VALIDACIONES ---
   const esFechaValida = (fecha) => {
     if (!fecha) return false;
     const f = new Date(fecha);

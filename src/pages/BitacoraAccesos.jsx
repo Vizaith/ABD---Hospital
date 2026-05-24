@@ -36,7 +36,6 @@ export const BitacoraAccesos = () => {
           {accesos.map((item) => {
             const fechaOriginal = new Date(item.fecha_acceso);
             
-            // Ajuste manual de -6 horas para corregir el desfase UTC a hora de Morelia
             const fechaAjustada = new Date(fechaOriginal.getTime() - (6 * 60 * 60 * 1000));
 
             const fechaFormateada = fechaAjustada.toLocaleDateString('es-MX');

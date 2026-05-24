@@ -11,7 +11,6 @@ export const Expedientes = () => {
   const [busqueda, setBusqueda] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Nuevo estado para el filtro
   const [fPaciente, setFPaciente] = useState('');
 
   const esDiagnosticoValido = form.diagnostico.trim().length >= 10;
@@ -42,7 +41,6 @@ export const Expedientes = () => {
     return p ? p.nombre_completo : 'Desconocido';
   };
 
-  // Filtrado de la lista en base al nombre
   const listaFiltrada = lista.filter(e => 
     getNombrePaciente(e.id_paciente).toLowerCase().includes(fPaciente.toLowerCase())
   );
@@ -94,7 +92,6 @@ export const Expedientes = () => {
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ id_paciente: '', diagnostico: '', fecha_apertura: '' }); setEditingId(null); setView('form'); }}>+ Nuevo Expediente</button>
         </div>
 
-        {/* Filtro visualmente consistente */}
         <div style={{ marginBottom: '1rem' }}>
           <input className="input-field" placeholder="Buscar expediente por nombre de paciente..." value={fPaciente} onChange={e => setFPaciente(e.target.value)} />
         </div>

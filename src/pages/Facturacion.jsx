@@ -14,7 +14,6 @@ export const Facturacion = () => {
 
   const metodosPago = ["Efectivo", "Tarjeta de Crédito", "Tarjeta de Débito", "Transferencia"];
 
-  // Validación: ID paciente presente, total numérico positivo y método seleccionado
   const isFormValid = form.id_paciente !== '' && parseFloat(form.total) > 0 && form.metodo !== '';
 
   useEffect(() => { 

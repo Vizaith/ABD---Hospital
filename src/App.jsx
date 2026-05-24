@@ -17,7 +17,7 @@ import { Medicos } from './pages/Medicos';
 import { Facturacion } from './pages/Facturacion';
 import { Laboratorios } from './pages/Laboratorios';
 import { Auditoria } from './pages/Auditoria';
-import { BitacoraAccesos } from './pages/BitacoraAccesos'; // Nuevo componente
+import { BitacoraAccesos } from './pages/BitacoraAccesos'; 
 import './styles/global.css';
 
 function AppContent() {

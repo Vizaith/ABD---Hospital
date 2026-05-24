@@ -8,7 +8,6 @@ export const Pacientes = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ nombre_completo: '', fecha_nacimiento: '', tipo_sangre: '', telefono: '' });
   
-  // Filtros
   const [fNombre, setFNombre] = useState('');
   const [fSangre, setFSangre] = useState('');
 
@@ -32,7 +31,6 @@ export const Pacientes = () => {
     if (data) setLista(data);
   };
 
-  // Filtrado
   const listaFiltrada = lista.filter(p => 
     p.nombre_completo.toLowerCase().includes(fNombre.toLowerCase()) &&
     (fSangre === '' || p.tipo_sangre === fSangre)
@@ -68,7 +66,6 @@ export const Pacientes = () => {
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ nombre_completo: '', fecha_nacimiento: '', tipo_sangre: '', telefono: '' }); setEditingId(null); setView('form'); }}>+ Nuevo Paciente</button>
         </div>
 
-        {/* Filtros */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
           <input className="input-field" placeholder="Buscar por nombre..." value={fNombre} onChange={e => setFNombre(e.target.value)} />
           <select className="input-field" value={fSangre} onChange={e => setFSangre(e.target.value)}>

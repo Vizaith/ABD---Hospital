@@ -1,7 +1,7 @@
 :root {
-  --primary-color: #064e3b; /* Verde oscuro (Sidebar) */
-  --accent-color: #059669;  /* Verde esmeralda (Botones/Acentos) */
-  --bg-body: #f0fdf4;      /* Fondo suave */
+  --primary-color: #064e3b;
+  --accent-color: #059669;  
+  --bg-body: #f0fdf4;     
   --text-main: #1f2937;
   --white: #ffffff;
 }
@@ -27,17 +27,16 @@ body {
   width: 100%;
 }
 
-/* Sidebar Elegante */
 .sidebar {
   background-color: var(--primary-color);
   color: var(--white);
-  height: 100vh;         /* Mantiene la altura completa */
+  height: 100vh;        
   position: sticky;
   top: 0;
   padding-top: 2rem;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-  overflow-y: auto;      /* <--- AGREGA ESTO: permite scroll si hay muchos enlaces */
-  scrollbar-width: thin; /* Opcional: para que la barra de scroll sea discreta */
+  overflow-y: auto;      
+  scrollbar-width: thin; 
 }
 
 .sidebar h2 { 

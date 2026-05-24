@@ -10,10 +10,8 @@ export const Medicos = () => {
   const [form, setForm] = useState({ nombre_completo: '', id_especialidad: '', cedula: '' });
   const [loading, setLoading] = useState(false);
 
-  // Validación: el botón solo se activa si todos los campos tienen valor
   const isFormValid = form.nombre_completo.trim() !== '' && form.id_especialidad !== '' && form.cedula.trim() !== '';
 
-  // Filtros
   const [fNombre, setFNombre] = useState('');
   const [fEspecialidad, setFEspecialidad] = useState('');
 
@@ -29,7 +27,6 @@ export const Medicos = () => {
     if(data) setEspecialidades(data);
   };
 
-  // Filtrado
   const listaFiltrada = lista.filter(m => 
     m.nombre_completo.toLowerCase().includes(fNombre.toLowerCase()) &&
     (fEspecialidad === '' || m.id_especialidad.toString() === fEspecialidad)
@@ -71,7 +68,6 @@ export const Medicos = () => {
           <button className="btn-submit" style={{ width: 'auto' }} onClick={() => { setForm({ nombre_completo: '', id_especialidad: '', cedula: '' }); setEditingId(null); setView('form'); }}>+ Nuevo Médico</button>
         </div>
 
-        {/* Filtros */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
           <input className="input-field" placeholder="Buscar por nombre..." value={fNombre} onChange={e => setFNombre(e.target.value)} />
           <select className="input-field" value={fEspecialidad} onChange={e => setFEspecialidad(e.target.value)}>
