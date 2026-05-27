@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import bcrypt from 'bcryptjs';
 import '../styles/forms.css';
 
 export const Login = () => {
@@ -17,20 +18,25 @@ export const Login = () => {
     setLoading(true);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: correo,
-        password: password,
-      });
-
-      if (authError) throw authError;
-
       const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .select('*, roles(nombre_rol)')
         .eq('correo', correo)
         .single();
 
-      if (userError) throw new Error("Error al cargar perfil de usuario");
+      if (userError || !userData) throw new Error("Credenciales incorrectas.");
+
+      const isValidPassword = bcrypt.compareSync(password, userData.password);
+      if (!isValidPassword) throw new Error("Credenciales incorrectas.");
+
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: correo,
+        password: password, 
+      });
+
+      if (authError) {
+        console.error("Error en Auth de Supabase:", authError.message);
+      }
 
       await supabase.from('bitacora_accesos').insert([
         { 
@@ -40,9 +46,13 @@ export const Login = () => {
       ]);
 
       localStorage.setItem('sigeh_user', JSON.stringify(userData));
-      navigate('/dashboard');
+      
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 200);
+      
     } catch (err) {
-      setError(err.message === 'Invalid login credentials' ? 'Credenciales incorrectas.' : err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -71,10 +81,7 @@ export const Login = () => {
           <button 
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            style={{ 
-              position: 'absolute', right: '12px', background: 'none', border: 'none', 
-              cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0' 
-            }}
+            style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0' }}
           >
             {showPassword ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" color="#64748b">
