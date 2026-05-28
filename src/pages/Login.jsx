@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import bcrypt from 'bcryptjs';
 import '../styles/forms.css';
 
 export const Login = () => {
@@ -18,6 +17,13 @@ export const Login = () => {
     setLoading(true);
 
     try {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: correo,
+        password: password, 
+      });
+
+      if (authError) throw new Error("Credenciales incorrectas.");
+
       const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .select('*, roles(nombre_rol)')
@@ -25,18 +31,6 @@ export const Login = () => {
         .single();
 
       if (userError || !userData) throw new Error("Credenciales incorrectas.");
-
-      const isValidPassword = bcrypt.compareSync(password, userData.password);
-      if (!isValidPassword) throw new Error("Credenciales incorrectas.");
-
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: correo,
-        password: password, 
-      });
-
-      if (authError) {
-        console.error("Error en Auth de Supabase:", authError.message);
-      }
 
       await supabase.from('bitacora_accesos').insert([
         { 

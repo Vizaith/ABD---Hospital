@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import bcrypt from 'bcryptjs';
 import '../styles/forms.css';
 
 export const Usuarios = () => {
@@ -53,15 +52,28 @@ export const Usuarios = () => {
       return;
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(form.password, salt);
-    const dataToSave = { ...form, password: hashedPassword };
-
     if (editingId) {
+      const dataToSave = { nombre: form.nombre, id_rol: form.id_rol, correo: form.correo };
       const { error } = await supabase.from('usuarios').update(dataToSave).eq('id_usuario', editingId);
       if (error) alert("Error al actualizar: " + error.message);
       else alert("Usuario actualizado correctamente");
     } else {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.correo,
+        password: form.password,
+        options: {
+          data: {
+            email_confirmed: true
+          }
+        }
+      });
+
+      if (authError) {
+        alert("Error en el registro de autenticación: " + authError.message);
+        return;
+      }
+
+      const dataToSave = { nombre: form.nombre, id_rol: form.id_rol, correo: form.correo, password: form.password };
       const { error } = await supabase.from('usuarios').insert([dataToSave]);
       if (error) alert("Error al crear usuario: " + error.message);
       else alert("Usuario creado correctamente");
